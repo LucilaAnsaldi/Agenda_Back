@@ -1,4 +1,5 @@
 ﻿using Agenda_Back.Entities;
+using Agenda_Back.Models.DTO;
 
 namespace Agenda_Back.Data.Repository.Interfaces
 {

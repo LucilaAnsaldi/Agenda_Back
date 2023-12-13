@@ -91,10 +91,10 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 //Add Services ****************** para poder inyectar los repository
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//****
-builder.Services.AddScoped<IContactoRepository, ContactoRepository>();
+builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAgendaRepository, AgendaRepository>();
-builder.Services.AddScoped<IAgendaUserRepository, AgendaUserRepository>();
+builder.Services.AddScoped<IContactBookRepository, ContactBookRepository>();
+builder.Services.AddScoped<ISharedContactBookRepository, SharedContactBookRepository>();
 
 
 
