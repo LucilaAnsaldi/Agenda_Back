@@ -1,62 +1,115 @@
-﻿using Agenda_Back.Data.Repository.Interfaces;
-using Agenda_Back.Models.DTO;
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
+using Agenda_Back.Models.DTO;
+using Microsoft.Extensions.Logging;
+using Agenda_Back.Services.Interfaces;
+using Agenda_Back.Entities;
 
-namespace Agenda_Back.Controllers
+namespace Agenda_Back_Tup1.Controllers
 {
-    [Route("authentication")]
+    [Route("api/authentication")]
     [ApiController]
-    public class AuthenticationController : Controller
+    public class AuthenticationController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public AuthenticationController(IUserRepository userRepository, IMapper mapper, IConfiguration config)
+        public AuthenticationController(IConfiguration config, IUserService userService, IMapper mapper)
         {
-            _userRepository = userRepository;
-            _mapper = mapper;
             _config = config;
+            _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpPost("authenticate")]
-        public ActionResult<string> Autenticar(AuthenticationRequestBody authenticationRequestBody) //Enviamos como parámetro la clase que creamos arriba
+        public async Task<IActionResult> Autenticar([FromBody] AuthenticationRequestBody authenticationRequestBody)
         {
-            //Validamos las credenciales
-            var user = _userRepository.ValidateUser(authenticationRequestBody); //Lo primero que hacemos es llamar a una función que valide los parámetros que enviamos.
+            try
+            {
+                var user = await _userService.ValidateUserAsync(authenticationRequestBody);
 
-            if (user is null) //Si el la función de arriba no devuelve nada es porque los datos son incorrectos, por lo que devolvemos un Unauthorized (un status code 401).
-                return Unauthorized();
+                if (user == null)
+                {
+                    return Unauthorized(new { error = "Credenciales inválidas" });
+                }
 
-            //creacion del token
-            var securityPassword = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Authentication:SecretForKey"])); //Traemos la SecretKey del Json. agregar antes: using Microsoft.IdentityModel.Tokens;
+                var securityPassword = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Authentication:SecretForKey"]));
+                var credentials = new SigningCredentials(securityPassword, SecurityAlgorithms.HmacSha256);
 
-            var credentials = new SigningCredentials(securityPassword, SecurityAlgorithms.HmacSha256);
+                var claimsForToken = new List<Claim>
+                {
+                    new Claim("sub", user.Id.ToString()),
+                    new Claim("given_name", user.Name),
+                    new Claim("family_name", user.Email)
+                };
 
-            //Los claims son datos en clave->valor que nos permite guardar data del usuario.
-            var claimsForToken = new List<Claim>();
-            claimsForToken.Add(new Claim("sub", user.Id.ToString())); //"sub" convencion para id de usuario 
-            claimsForToken.Add(new Claim("given_name", user.Name)); //convenciones para nombre y apellido
-            claimsForToken.Add(new Claim("family_name", user.Email));
+                var jwtSecurityToken = new JwtSecurityToken(
+                    _config["Authentication:Issuer"],
+                    _config["Authentication:Audience"],
+                    claimsForToken,
+                    DateTime.UtcNow,
+                    DateTime.UtcNow.AddHours(1),
+                    credentials
+                );
 
-            var jwtSecurityToken = new JwtSecurityToken( //agregar using System.IdentityModel.Tokens.Jwt; Acá es donde se crea el token con toda la data que le pasamos antes.
-              _config["Authentication:Issuer"],
-              _config["Authentication:Audience"],
-              claimsForToken,
-              DateTime.UtcNow,
-              DateTime.UtcNow.AddHours(1),
-              credentials);
+                var tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
 
-            var tokenToReturn = new JwtSecurityTokenHandler() //Pasamos el token a string
-                .WriteToken(jwtSecurityToken);
+                return Ok(new { token = tokenToReturn });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
 
+        [HttpPost("createuser")]
+        public async Task<IActionResult> PostUser([FromBody] UserForCreationDTO userDtoCreacion)
+        {
+            try
+            {
+                var user = _mapper.Map<User>(userDtoCreacion);
+                var usersActivos = await _userService.GetAllUsersAsync();
 
-            return Ok(tokenToReturn);
+                foreach (var userActivo in usersActivos)
+                {
+                    if (user.Email == userActivo.Email)
+                    {
+                        return BadRequest(new { error = "El email ingresado ya es utilizado en una cuenta activa" });
+                    }
+                }
+
+                var userItemDto = await _userService.CreateUserAsync(userDtoCreacion);
+                var userItem = _mapper.Map<User>(userItemDto);
+
+                return Created("Created", userItem);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("userId")]
+        public IActionResult GetUserId()
+        {
+            try
+            {
+                int userSesionId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                return Ok(userSesionId);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

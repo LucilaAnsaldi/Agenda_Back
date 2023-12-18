@@ -4,10 +4,10 @@ namespace Agenda_Back.Data.Repository.Interfaces
 {
     public interface IContactRepository
     {
-        public List<Contact> GetListContacts(int contactBookId);
-        public Contact GetContact(int id);
-        public void DeleteContact(Contact contact);
-        public Contact AddContact(Contact contact);
-        public void UpdateContact(Contact contact);
+        public Task<List<Contact>> GetListContactsAsync(int contactBookId);
+        public Task<Contact> GetContactByIdAsync(int id);
+        public Task<Contact> CreateContactAsync(Contact contact);
+        public Task DeleteContactAsync(int id);
+        public Task<Contact> UpdateContactAsync(Contact contact);
     }
 }

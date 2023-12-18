@@ -5,11 +5,15 @@ namespace Agenda_Back.Data.Repository.Interfaces
 {
     public interface IUserRepository
     {
-        public User ValidateUser(AuthenticationRequestBody authRequestBody);
-        public List<User> GetListUsers();
-        public User GetUser(int id);
-        public void DeleteUser(User user);
-        public User AddUser(User user);
-        public void UpdateUserData(User user);
+        public Task<User?> ValidateUserAsync(AuthenticationRequestBody authRequestBody);
+        public Task<User> CreateUserAsync(User user);
+        public Task DeleteUserAsync(User user);
+        public Task<List<User>> GetListUsersAsync();
+        public Task<User> GetUserByIdAsync(int id);
+        public Task<UserDTO?> UpdateUserDataAsync(User user);
+        public Task<List<ContactBook>> GetMyContactBooksAsync(int userId);
+        public Task<List<SharedContactBook>> GetSharedContactBooksAsync(int userId);
+        public Task ShareContactBookAsync(int ownerId, int sharedUserId, int contactBookId);
+
     }
 }

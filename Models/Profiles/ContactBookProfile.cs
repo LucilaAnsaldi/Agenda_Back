@@ -6,9 +6,16 @@ namespace Agenda_Back.Models.Profiles
 {
     public class ContactBookProfile : Profile
     {
-        public ContactBookProfile() {
+        public ContactBookProfile() 
+        {
             CreateMap<ContactBook, ContactBookDTO>();
             CreateMap<ContactBookDTO, ContactBook>();
+
+            CreateMap<ContactBook, ContactBookForCreationDTO>();
+            CreateMap<ContactBookForCreationDTO, ContactBook>();
+
+            CreateMap<ContactBook, ContactBookForModificationDTO>();
+            CreateMap<ContactBookForModificationDTO, ContactBook>();
         }
     }
 }

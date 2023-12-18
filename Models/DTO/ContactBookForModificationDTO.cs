@@ -1,10 +1,6 @@
-﻿using Agenda_Back.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace Agenda_Back.Models.DTO
+﻿namespace Agenda_Back.Models.DTO
 {
-    public class ContactBookDTO
+    public class ContactBookForModificationDTO
     {
         public int Id { get; set; }
 

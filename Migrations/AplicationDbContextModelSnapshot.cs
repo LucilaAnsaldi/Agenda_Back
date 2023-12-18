@@ -32,6 +32,10 @@ namespace Agenda_Back.Migrations
                     b.Property<int>("ContactBookId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -67,15 +71,20 @@ namespace Agenda_Back.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ContactBookName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Number")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Description")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("OwnerUserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId");
 
                     b.ToTable("ContactBooks");
                 });
@@ -138,16 +147,27 @@ namespace Agenda_Back.Migrations
                     b.Navigation("ContactBook");
                 });
 
-            modelBuilder.Entity("Agenda_Back.Entities.SharedContactBook", b =>
+            modelBuilder.Entity("Agenda_Back.Entities.ContactBook", b =>
                 {
-                    b.HasOne("Agenda_Back.Entities.ContactBook", "ContactBook")
-                        .WithMany("SharedContactBooks")
-                        .HasForeignKey("ContactBookId")
+                    b.HasOne("Agenda_Back.Entities.User", "OwnerUser")
+                        .WithMany("MyContactBooks")
+                        .HasForeignKey("OwnerUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("OwnerUser");
+                });
+
+            modelBuilder.Entity("Agenda_Back.Entities.SharedContactBook", b =>
+                {
+                    b.HasOne("Agenda_Back.Entities.ContactBook", "ContactBook")
+                        .WithMany("SharedUsers")
+                        .HasForeignKey("ContactBookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Agenda_Back.Entities.User", "User")
-                        .WithMany("SharedContactBooks")
+                        .WithMany("MySharedContactBooks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -161,12 +181,14 @@ namespace Agenda_Back.Migrations
                 {
                     b.Navigation("Contacts");
 
-                    b.Navigation("SharedContactBooks");
+                    b.Navigation("SharedUsers");
                 });
 
             modelBuilder.Entity("Agenda_Back.Entities.User", b =>
                 {
-                    b.Navigation("SharedContactBooks");
+                    b.Navigation("MyContactBooks");
+
+                    b.Navigation("MySharedContactBooks");
                 });
 #pragma warning restore 612, 618
         }

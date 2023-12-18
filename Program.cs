@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,23 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+
+//Configuracion del logger de errores
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "logs/myapp-.txt",
+        rollingInterval: RollingInterval.Day,
+        fileSizeLimitBytes: 500000, // Tamaño límite del archivo
+        retainedFileCountLimit: 2 // Número máximo de archivos a mantener antes de eliminar los más antiguos
+    )
+    .CreateLogger();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -116,5 +135,7 @@ app.UseAuthentication();//********************
 app.UseAuthorization();
 
 app.MapControllers();
+
+Log.CloseAndFlush();
 
 app.Run();

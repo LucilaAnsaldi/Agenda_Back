@@ -30,20 +30,29 @@ namespace Agenda_Back.Data
             
             builder.Entity<SharedContactBook>()
                 .HasOne(s => s.ContactBook)
-                .WithMany(c => c.SharedContactBooks)
+                .WithMany(c => c.SharedUsers)
                 .HasForeignKey(s => s.ContactBookId);
 
             builder.Entity<SharedContactBook>()
                 .HasOne(s => s.User)
-                .WithMany(u => u.SharedContactBooks)
+                .WithMany(u => u.MySharedContactBooks)
                 .HasForeignKey(s => s.UserId);
-
             
             builder.Entity<Contact>()
                 .HasOne(c => c.ContactBook)
-                .WithMany(cb => cb.Contacts)
+                .WithMany(cs => cs.Contacts)
                 .HasForeignKey(c => c.ContactBookId);
 
+            builder.Entity<ContactBook>()
+                .HasOne(c => c.OwnerUser)
+                .WithMany(cb => cb.MyContactBooks)
+                .HasForeignKey(c => c.OwnerUserId);
+
+            builder.Entity<ContactBook>()
+                .HasMany(cb => cb.SharedUsers)
+                .WithOne(s => s.ContactBook)
+                .HasForeignKey(s => s.ContactBookId)
+                .OnDelete(DeleteBehavior.Restrict); // Cambiado de Cascade a Restrict
 
             // Falta agregar cómo se eliminan las tablas relacionadas (en cascada, no action, etc)
         }

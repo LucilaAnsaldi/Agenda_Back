@@ -10,6 +10,12 @@ namespace Agenda_Back.Models.Profiles
         {
             CreateMap<Contact, ContactDTO>();
             CreateMap<ContactDTO, Contact>();
+
+            CreateMap<Contact, ContactForCreationDTO>();
+            CreateMap<ContactForCreationDTO, Contact>();
+
+            CreateMap<Contact, ContactForModificationDTO>();
+            CreateMap<ContactForModificationDTO, Contact>();
         }
     }
 }

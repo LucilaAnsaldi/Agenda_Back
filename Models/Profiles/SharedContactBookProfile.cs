@@ -6,8 +6,9 @@ namespace Agenda_Back.Models.Profiles
 {
     public class SharedContactBookProfile : Profile
     {
-        public SharedContactBookProfile() { 
-        CreateMap<SharedContactBook, SharedContactBookDTO>();
+        public SharedContactBookProfile() 
+        { 
+            CreateMap<SharedContactBook, SharedContactBookDTO>();
             CreateMap<SharedContactBookDTO, SharedContactBook>();
         }
     }

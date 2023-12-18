@@ -1,50 +1,159 @@
-﻿using Agenda_Back.Data.Repository.Interfaces;
-using Agenda_Back.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Agenda_Back.Models.DTO;
-using AutoMapper;
+using Agenda_Back.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace Agenda_Back.Controllers
 {
-    [Route("user")]
+    [Authorize]
     [ApiController]
-    public class UserController : Controller
+    [Route("api/User")]
+    public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository, IMapper mapper)
+        public UserController(IUserService userService, ILogger<UserController> logger)
         {
-            _userRepository = userRepository;
-            _mapper = mapper;
+            _userService = userService;
+            _logger = logger;
         }
-        [HttpPost]
-        public IActionResult CreateUser(UserDTOCreation userDTOCreation)
+
+        [HttpGet("getAll")]
+        public async Task<ActionResult<List<UserDTO>>> GetAllUsers()
         {
             try
             {
-                var user = _mapper.Map<User>(userDTOCreation);
-
-                var usersActivos = _userRepository.GetListUsers();
-
-                foreach (var userActivo in usersActivos)
-                {
-                    if (user.Email == userActivo.Email)
-                    {
-                        return BadRequest("El email ingresado ya es utilizado en una cuenta activa");
-                    }
-                }
-
-                var userItem = _userRepository.AddUser(user);
-
-                var userItemDto = _mapper.Map<UserDTO>(userItem);
-
-                return Created("Created", userItemDto);
+                var users = await _userService.GetAllUsersAsync();
+                return Ok(users);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al obtener la lista de usuarios");
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("getById/{userId}")]
+        public async Task<ActionResult<UserDTO>> GetUserById(int userId)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return NotFound($"Usuario con ID {userId} no encontrado");
+                }
+
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener usuario con ID {userId}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/{userId}")] // Endpoint para eliminar la cuenta del usuario
+        public async Task<ActionResult> DeleteUser(int userId)
+        {
+            try
+            {
+                int userSesionId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+                var user = _userService.GetUserByIdAsync;
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                else if (userId != userSesionId)
+                {
+                    return Unauthorized();
+                }
+                else
+                {
+                    await _userService.DeleteUserAsync(userId);
+                    return NoContent();
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al eliminar usuario con ID {userId}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("update/{userId}")]
+        public async Task<ActionResult<UserDTO>> UpdateUser(int userId, [FromBody] UserForModificationDTO userForUpdateDTO)
+        {
+            try
+            {
+                var updatedUser = _userService.UpdateUserAsync(userId, userForUpdateDTO);
+                return Ok(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al actualizar usuario con ID {userId}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("getAll/{userId}/contactBooks")]
+        public async Task<ActionResult<List<ContactBookDTO>>> GetMyContactBooks(int userId)
+        {
+            try
+            {
+                var contactBooks = await _userService.GetMyContactBooksAsync(userId);
+                return Ok(contactBooks);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener lista de ContactBooks para el usuario con ID {userId}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("getAll/{userId}/sharedContactBooks")]
+        public async Task<ActionResult<List<SharedContactBookDTO>>> GetSharedContactBooks(int userId)
+        {
+            try
+            {
+                var sharedContactBooks = await _userService.GetSharedContactBooksAsync(userId);
+                return Ok(sharedContactBooks);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener lista de SharedContactBooks para el usuario con ID {userId}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("shareContactBook")]
+        public async Task<IActionResult> ShareContactBook([FromQuery] int sharedUserId, [FromQuery] int contactBookId)
+        {
+            try
+            {
+                int ownerId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+                await _userService.ShareContactBookAsync(ownerId, sharedUserId, contactBookId);
+
+                return Ok("La agenda se compartió exitosamente");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con ID {sharedUserId}");
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

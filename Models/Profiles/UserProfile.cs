@@ -6,12 +6,16 @@ namespace Agenda_Back.Models.Profiles
 {
     public class UserProfile : Profile
     {
-        public UserProfile() {
+        public UserProfile() 
+        {
             CreateMap<User, UserDTO>();
             CreateMap<UserDTO, User>();
 
-            CreateMap<User, UserDTOCreation>();
-            CreateMap<UserDTOCreation, User>();
+            CreateMap<User, UserForCreationDTO>();
+            CreateMap<UserForCreationDTO, User>();
+
+            CreateMap<User, UserForModificationDTO>();
+            CreateMap<UserForModificationDTO, User>();
         }
     }
 }

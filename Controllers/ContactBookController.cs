@@ -1,121 +1,92 @@
-﻿using Agenda_Back.Data.Repository.Interfaces;
-using Agenda_Back.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Agenda_Back.Models.DTO;
-using AutoMapper;
+using Agenda_Back.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.Extensions.Logging;
 
 namespace Agenda_Back.Controllers
 {
-    [Route("contactBook")]
-    [ApiController]
     [Authorize]
-    public class ContactBookController : Controller
+    [ApiController]
+    [Route("api/ContactBook")]
+    public class ContactBookController : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly IContactBookRepository _contactBookRepository;
-        private readonly ISharedContactBookRepository _sharedContactBookRepository;
+        private readonly IContactBookService _contactBookService;
+        private readonly ILogger<ContactBookController> _logger;
 
-        public ContactBookController(IMapper mapper, IContactBookRepository contactBookRepository, ISharedContactBookRepository sharedContactBookRepository)
+        public ContactBookController(IContactBookService contactBookService, ILogger<ContactBookController> logger)
         {
-            _mapper = mapper;
-            _contactBookRepository = contactBookRepository;
-            _sharedContactBookRepository = sharedContactBookRepository;
+            _contactBookService = contactBookService;
+            _logger = logger;
         }
 
-        [HttpGet]
-        public IActionResult GetAllContactBooks()
+        [HttpGet("getByUserId/{userId}")]
+        public async Task<ActionResult<List<ContactBookDTO>>> GetContactBooksByUserId(int userId)
         {
             try
             {
-                var contactBooks = _contactBookRepository.GetListContactBooks();
-                var listContactBooks = _mapper.Map<IEnumerable<ContactBookDTO>>(contactBooks);
-                return Ok(listContactBooks);
-
-            }
-            catch (Exception ex) { return BadRequest(ex.Message); }
-        }
-
-        [HttpGet("getContactBookOfUser")]
-        public IActionResult GetContactBook()
-        {
-            try
-            {
-                int userId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-                var listContactBookOfUser = _sharedContactBookRepository.GetSharedContactBooks(userId); //trae las contact book del usuario
-                List<ContactBook> listContactBooks = new List<ContactBook>();
-
-                foreach (var contactBookUser in listContactBookOfUser)
-                {
-                    var contactBook = _contactBookRepository.GetContactBookById(contactBookUser.ContactBookId);
-
-                    listContactBooks.Add(contactBook);
-                }
-
-                var listContactBookDto = _mapper.Map<IEnumerable<ContactBookDTO>>(listContactBooks);
-                return Ok(listContactBookDto);
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPost] //new contactBook
-        public IActionResult CreateContactBook(ContactBookDTO contactBookDTO)
-        {
-            try
-            {
-                int userId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-
-                var contactBook = _mapper.Map<ContactBook>(contactBookDTO);
-
-                var contactBookId = _contactBookRepository.CreateContactBook(contactBook); // devuelve el id del contactBook creado
-
-                _sharedContactBookRepository.addSharedContactBook(userId, contactBookId);
-
-                return Created("Created", contactBookId);
+                var contactBooks = await _contactBookService.GetContactBooksByUserIdAsync(userId);
+                return Ok(contactBooks);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error al obtener las agendas del usuario con ID {userId}");
                 return BadRequest(ex.Message);
             }
         }
 
-        [HttpDelete]
-        public IActionResult DeleteContactBook(int contactBookId)
+        [HttpGet("getById/{contactBookId}")]
+        public async Task<ActionResult<ContactBookDTO>> GetContactBookById(int contactBookId)
         {
             try
             {
-                int userId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                var contactBook = await _contactBookService.GetContactBookByIdAsync(contactBookId);
 
-                var sharedContactBooks = _sharedContactBookRepository.GetSharedContactBooks(userId);
-
-                List<ContactBook> contactBooksList = new List<ContactBook>();
-
-                var contactBook = _contactBookRepository.GetContactBookById(contactBookId);
-
-                foreach (var sharedContactBook in sharedContactBooks)
+                if (contactBook == null)
                 {
-                    if (sharedContactBook.ContactBookId == contactBookId)
-                    {
-                        if (contactBook == null)
-                        {
-                            return NotFound();
-                        }
-
-                        _sharedContactBookRepository.DeleteSharedContactBook(contactBookId);
-                        _contactBookRepository.DeleteContactBook(contactBook);
-
-                        return Ok("Ok");
-
-                    }
+                    return NotFound($"Agenda con ID {contactBookId} no encontrada");
                 }
-                return Unauthorized();
+
+                return Ok(contactBook);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error al obtener la agenda con ID {contactBookId}");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("create")]
+        public async Task<ActionResult<int>> CreateContactBook([FromBody] ContactBookDTO contactBookDTO)
+        {
+            try
+            {
+                int ownerId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                var contactBookId = await _contactBookService.CreateContactBookAsync(contactBookDTO, ownerId);
+                return Ok(contactBookId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear la agenda");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/{contactBookId}")]
+        public async Task<ActionResult> DeleteContactBook(int contactBookId)
+        {
+            try
+            {
+                await _contactBookService.DeleteContactBookAsync(contactBookId);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al eliminar la agenda con ID {contactBookId}");
                 return BadRequest(ex.Message);
             }
         }

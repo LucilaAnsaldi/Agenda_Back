@@ -1,21 +1,25 @@
 ﻿// SharedContactBook.cs
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Agenda_Back.Entities
 {
-    // Tabla que representa el libro de contactos compartido entre usuarios
+    // Tabla que representa la agenda que fue compartida, 
+    // y los usuarios que pueden ver esa agenda
     public class SharedContactBook
     {
+        [Key]
         public int Id { get; set; }
-
-        // Relación con el usuario que compartió el libro de contactos
-        [ForeignKey("UserId")]
         public int UserId { get; set; }
+
+        public int ContactBookId { get; set; }
+
+        // Usuarios que pueden ver esta agenda (SharedUsers), es decir, los usuarios a los que le compartieron esta agenda
+        [ForeignKey("UserId")]
         public User User { get; set; }
 
-        // Relación con el libro de contactos compartido
+        // Agenda que fue compartida, es decir que pueden ver otros usuarios
         [ForeignKey("ContactBookId")]
-        public int ContactBookId { get; set; }
         public ContactBook ContactBook { get; set; }
     }
 }
