@@ -10,6 +10,9 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Serilog;
 using Serilog.Events;
+using Agenda_Back.Services.Implementations;
+using Agenda_Back.Services.Interfaces;
+using Agenda_Back.Services.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,14 +111,17 @@ builder.Services.AddAuthentication("Bearer") //"Bearer" es el tipo de auntentica
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-//Add Services ****************** para poder inyectar los repository
+//Add Services ****************** 
+//repository
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//****
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IContactBookRepository, ContactBookRepository>();
 builder.Services.AddScoped<ISharedContactBookRepository, SharedContactBookRepository>();
-
-
+//service
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IContactBookService, ContactBookService>();
 
 var app = builder.Build();
 
