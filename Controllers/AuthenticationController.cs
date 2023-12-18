@@ -63,7 +63,7 @@ namespace Agenda_Back_Tup1.Controllers
 
                 var tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
 
-                return Ok(new { token = tokenToReturn });
+                return Ok(tokenToReturn);
             }
             catch (Exception ex)
             {
