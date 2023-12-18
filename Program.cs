@@ -100,24 +100,28 @@ builder.Services.AddAuthentication("Bearer") //"Bearer" es el tipo de auntentica
         };
     }
 );
-//var config = new MapperConfiguration(cfg =>
-//{
-//    cfg.AddProfile(new ContactoProfile());
-//    cfg.AddProfile(new UserProfile());
-//});
-//var mapper = config.CreateMapper();
+
 
 //AUTOMAPPER **********************
 
-builder.Services.AddAutoMapper(typeof(Program));
+var config = new MapperConfiguration(cfg =>
+{
+    cfg.AddProfile(new ContactBookProfile());
+    cfg.AddProfile(new ContactProfile());
+    cfg.AddProfile(new SharedContactBookProfile());
+    cfg.AddProfile(new UserProfile());
+});
 
-//Add Services ****************** 
+//Add Services ******************
+
+//automapper
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+ 
 //repository
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//****
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IContactBookRepository, ContactBookRepository>();
-builder.Services.AddScoped<ISharedContactBookRepository, SharedContactBookRepository>();
 //service
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IContactService, ContactService>();
