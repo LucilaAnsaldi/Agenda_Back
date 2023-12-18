@@ -6,7 +6,7 @@ namespace Agenda_Back.Services.Interfaces
     {
         public Task<List<ContactBookDTO>> GetContactBooksByUserIdAsync(int userId);
         public Task<ContactBookDTO?> GetContactBookByIdAsync(int contactBookId);
-        public Task<int> CreateContactBookAsync(ContactBookDTO contactBookDTO, int ownerUserId);
+        public Task<ContactBookDTO> CreateContactBookAsync(ContactBookForCreationDTO contactBookDTO, int ownerUserId);
         public Task DeleteContactBookAsync(int contactBookId);
     }
 }

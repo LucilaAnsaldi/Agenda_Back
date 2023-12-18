@@ -52,14 +52,14 @@ namespace Agenda_Back.Data.Repository.Implementation
             }
         }
 
-        public async Task<int> CreateContactBookAsync(ContactBook contactBook, int ownerUserId)
+        public async Task<ContactBook> CreateContactBookAsync(ContactBook contactBook, int ownerUserId)
         {
             try
             {
                 contactBook.OwnerUserId = ownerUserId;
                 _context.ContactBooks.Add(contactBook);
                 await _context.SaveChangesAsync();
-                return contactBook.Id;
+                return contactBook;
             }
             catch (Exception ex)
             {

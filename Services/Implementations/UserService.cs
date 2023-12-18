@@ -150,15 +150,15 @@ namespace Agenda_Back.Services.Implementations
         }
 
 
-        public async Task<List<SharedContactBookDTO>> GetSharedContactBooksAsync(int userId)
+        public async Task<List<ContactBookDTO>> GetSharedContactBooksAsync(int userId)
         {
             try
             {
                 var sharedContactBooks = await _userRepository.GetSharedContactBooksAsync(userId);
 
-                var sharedContactBookDTOs = _mapper.Map<List<SharedContactBookDTO>>(sharedContactBooks);
+                var contactBookDTOs = _mapper.Map<List<ContactBookDTO>>(sharedContactBooks);
 
-                return sharedContactBookDTOs;
+                return contactBookDTOs;
             }
             catch (Exception ex)
             {
@@ -166,6 +166,7 @@ namespace Agenda_Back.Services.Implementations
                 throw;
             }
         }
+
 
         public async Task ShareContactBookAsync(int ownerId, int sharedUserId, int contactBookId)
         {

@@ -142,13 +142,14 @@ namespace Agenda_Back.Data.Repository.Implementation
             }
         }
 
-        public async Task<List<SharedContactBook>> GetSharedContactBooksAsync(int userId)
+        public async Task<List<ContactBook>> GetSharedContactBooksAsync(int userId)
         {
             try
             {
                 var sharedContactBooks = await _context.SharedContactBooks
                     .Where(sc => sc.UserId == userId)
-                    .Include(sc => sc.ContactBook)  // Incluir la relación con el libro de contactos
+                    .Include(sc => sc.ContactBook)
+                    .Select(sc => sc.ContactBook)  // Seleccionar solo el/los ContactBook
                     .ToListAsync();
 
                 return sharedContactBooks;

@@ -11,7 +11,7 @@ namespace Agenda_Back.Services.Interfaces
         public Task<UserDTO?> GetUserByIdAsync(int userId);
         public Task<UserDTO> UpdateUserAsync(int userId, UserForModificationDTO userForUpdateDTO);
         public Task<List<ContactBookDTO>> GetMyContactBooksAsync(int userId);
-        public Task<List<SharedContactBookDTO>> GetSharedContactBooksAsync(int userId);
+        public Task<List<ContactBookDTO>> GetSharedContactBooksAsync(int userId);
         public Task ShareContactBookAsync(int ownerId, int sharedUserId, int contactBookId);
     }
 }

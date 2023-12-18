@@ -51,12 +51,13 @@ namespace Agenda_Back.Services.Implementation
             }
         }
 
-        public async Task<int> CreateContactBookAsync(ContactBookDTO contactBookDTO, int ownerUserId)
+        public async Task<ContactBookDTO> CreateContactBookAsync(ContactBookForCreationDTO contactBookDTO, int ownerUserId)
         {
             try
             {
                 var contactBook = _mapper.Map<ContactBook>(contactBookDTO);
-                return await _contactBookRepository.CreateContactBookAsync(contactBook, ownerUserId);
+                var createdContactBook = await _contactBookRepository.CreateContactBookAsync(contactBook, ownerUserId);
+                return _mapper.Map<ContactBookDTO>(createdContactBook);
             }
             catch (Exception ex)
             {

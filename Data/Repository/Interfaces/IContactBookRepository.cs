@@ -6,7 +6,7 @@ namespace Agenda_Back.Data.Repository.Interfaces
     {
         public Task<List<ContactBook>> GetContactBooksByUserIdAsync(int userId);
         public Task<ContactBook?> GetContactBookByIdAsync(int contactBookId);
-        public Task<int> CreateContactBookAsync(ContactBook contactBook, int ownerUserId);
+        public Task<ContactBook> CreateContactBookAsync(ContactBook contactBook, int ownerUserId);
         public Task DeleteContactBookAsync(ContactBook contactBook);
     }
 }

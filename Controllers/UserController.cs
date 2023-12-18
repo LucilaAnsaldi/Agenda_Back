@@ -123,7 +123,7 @@ namespace Agenda_Back.Controllers
         }
 
         [HttpGet("getAll/{userId}/sharedContactBooks")]
-        public async Task<ActionResult<List<SharedContactBookDTO>>> GetSharedContactBooks(int userId)
+        public async Task<ActionResult<List<ContactBookDTO>>> GetSharedContactBooks(int userId)
         {
             try
             {

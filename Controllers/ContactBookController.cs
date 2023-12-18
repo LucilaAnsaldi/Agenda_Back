@@ -61,13 +61,13 @@ namespace Agenda_Back.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult<int>> CreateContactBook([FromBody] ContactBookDTO contactBookDTO)
+        public async Task<ActionResult<ContactBookDTO>> CreateContactBook([FromBody] ContactBookForCreationDTO contactBookDTO)
         {
             try
             {
                 int ownerId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-                var contactBookId = await _contactBookService.CreateContactBookAsync(contactBookDTO, ownerId);
-                return Ok(contactBookId);
+                var createdContactBookDTO = await _contactBookService.CreateContactBookAsync(contactBookDTO, ownerId);
+                return Ok(createdContactBookDTO);
             }
             catch (Exception ex)
             {
@@ -75,6 +75,7 @@ namespace Agenda_Back.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         [HttpDelete("delete/{contactBookId}")]
         public async Task<ActionResult> DeleteContactBook(int contactBookId)
