@@ -97,27 +97,12 @@ namespace Agenda_Back.Controllers
         {
             try
             {
-                var updatedUser = _userService.UpdateUserAsync(userId, userForUpdateDTO);
+                var updatedUser = await _userService.UpdateUserAsync(userId, userForUpdateDTO);
                 return Ok(updatedUser);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error al actualizar usuario con ID {userId}");
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("getAll/{userId}/contactBooks")]
-        public async Task<ActionResult<List<ContactBookDTO>>> GetMyContactBooks(int userId)
-        {
-            try
-            {
-                var contactBooks = await _userService.GetMyContactBooksAsync(userId);
-                return Ok(contactBooks);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error al obtener lista de ContactBooks para el usuario con ID {userId}");
                 return BadRequest(ex.Message);
             }
         }

@@ -11,7 +11,6 @@ namespace Agenda_Back.Data.Repository.Interfaces
         public Task<List<User>> GetListUsersAsync();
         public Task<User> GetUserByIdAsync(int id);
         public Task<UserDTO?> UpdateUserDataAsync(User user);
-        public Task<List<ContactBook>> GetMyContactBooksAsync(int userId);
         public Task<List<ContactBook>> GetSharedContactBooksAsync(int userId);
         public Task ShareContactBookAsync(int ownerId, int sharedUserId, int contactBookId);
 

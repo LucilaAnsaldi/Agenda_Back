@@ -132,24 +132,6 @@ namespace Agenda_Back.Services.Implementations
             }
         }
 
-        public async Task<List<ContactBookDTO>> GetMyContactBooksAsync(int userId)
-        {
-            try
-            {
-                var contactBooks = await _userRepository.GetMyContactBooksAsync(userId);
-
-                var contactBookDTOs = _mapper.Map<List<ContactBookDTO>>(contactBooks);
-
-                return contactBookDTOs;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error al obtener lista de ContactBooks para el usuario con ID {userId}");
-                throw;
-            }
-        }
-
-
         public async Task<List<ContactBookDTO>> GetSharedContactBooksAsync(int userId)
         {
             try

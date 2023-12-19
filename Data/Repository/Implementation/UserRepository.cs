@@ -125,23 +125,6 @@ namespace Agenda_Back.Data.Repository.Implementation
             }
         }
 
-        public async Task<List<ContactBook>> GetMyContactBooksAsync(int userId)
-        {
-            try
-            {
-                var contactBooks = await _context.ContactBooks
-                    .Where(cb => cb.OwnerUserId == userId)
-                    .ToListAsync();
-
-                return contactBooks;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error al obtener lista de ContactBooks para el usuario con ID {userId}");
-                throw;
-            }
-        }
-
         public async Task<List<ContactBook>> GetSharedContactBooksAsync(int userId)
         {
             try
