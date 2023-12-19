@@ -123,22 +123,21 @@ namespace Agenda_Back.Controllers
         }
 
         [HttpPost("shareContactBook")]
-        public async Task<IActionResult> ShareContactBook([FromQuery] int sharedUserId, [FromQuery] int contactBookId)
+        public async Task<IActionResult> ShareContactBook([FromQuery] string sharedUserEmail, [FromQuery] int contactBookId)
         {
             try
             {
                 int ownerId = Int32.Parse(HttpContext.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
 
-                await _userService.ShareContactBookAsync(ownerId, sharedUserId, contactBookId);
+                await _userService.ShareContactBookAsync(ownerId, sharedUserEmail, contactBookId);
 
                 return Ok("La agenda se compartió exitosamente");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con ID {sharedUserId}");
+                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con correo electrónico {sharedUserEmail}");
                 return BadRequest(ex.Message);
             }
         }
-
     }
 }

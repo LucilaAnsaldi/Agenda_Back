@@ -149,16 +149,15 @@ namespace Agenda_Back.Services.Implementations
             }
         }
 
-
-        public async Task ShareContactBookAsync(int ownerId, int sharedUserId, int contactBookId)
+        public async Task ShareContactBookAsync(int ownerId, string sharedUserEmail, int contactBookId)
         {
             try
             {
-                await _userRepository.ShareContactBookAsync(ownerId, sharedUserId, contactBookId);
+                await _userRepository.ShareContactBookAsync(ownerId, sharedUserEmail, contactBookId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con ID {sharedUserId}");
+                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con correo electrónico {sharedUserEmail}");
                 throw;
             }
         }

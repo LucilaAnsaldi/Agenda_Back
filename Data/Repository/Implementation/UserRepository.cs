@@ -144,7 +144,7 @@ namespace Agenda_Back.Data.Repository.Implementation
             }
         }
 
-        public async Task ShareContactBookAsync(int ownerId, int sharedUserId, int contactBookId)
+        public async Task ShareContactBookAsync(int ownerId, string sharedUserEmail, int contactBookId)
         {
             try
             {
@@ -154,7 +154,7 @@ namespace Agenda_Back.Data.Repository.Implementation
 
                 var sharedUser = await _context.Users
                     .Include(u => u.MySharedContactBooks)
-                    .FirstOrDefaultAsync(u => u.Id == sharedUserId);
+                    .FirstOrDefaultAsync(u => u.Email == sharedUserEmail);
 
                 var contactBook = owner?.MyContactBooks.FirstOrDefault(cb => cb.Id == contactBookId);
 
@@ -165,7 +165,7 @@ namespace Agenda_Back.Data.Repository.Implementation
 
                 var sharedContactBook = new SharedContactBook
                 {
-                    UserId = sharedUserId,
+                    UserId = sharedUser.Id,
                     ContactBookId = contactBookId
                     // Otros campos que puedan ser necesarios...
                 };
@@ -175,7 +175,7 @@ namespace Agenda_Back.Data.Repository.Implementation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con ID {sharedUserId}");
+                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con correo electrónico {sharedUserEmail}");
                 throw;
             }
         }
