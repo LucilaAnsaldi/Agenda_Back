@@ -171,7 +171,7 @@ namespace Agenda_Back.Data.Repository.Implementation
                 // Asegurémonos de que no estemos compartiendo la misma agenda más de una vez
                 if (sharedUser.MySharedContactBooks.Any(sc => sc.ContactBookId == contactBookId))
                 {
-                    throw new Exception($"La agenda con ID {contactBookId} ya está compartida con el usuario con correo electrónico {sharedUserEmail}");
+                    throw new Exception($"La agenda con ID {contactBookId} ya está compartida a ese usuario");
                 }
 
                 var sharedContactBook = new SharedContactBook
@@ -186,11 +186,11 @@ namespace Agenda_Back.Data.Repository.Implementation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario con correo electrónico {sharedUserEmail}");
+                _logger.LogError(ex, $"Error al compartir la agenda con ID {contactBookId} con el usuario");
                 throw;
             }
         }
-
+    
     }
 }
 
