@@ -156,11 +156,22 @@ namespace Agenda_Back.Data.Repository.Implementation
                     .Include(u => u.MySharedContactBooks)
                     .FirstOrDefaultAsync(u => u.Email == sharedUserEmail);
 
-                var contactBook = owner?.MyContactBooks.FirstOrDefault(cb => cb.Id == contactBookId);
-
-                if (owner == null || sharedUser == null || contactBook == null)
+                if (owner == null || sharedUser == null)
                 {
-                    throw new Exception("Usuario, usuario compartido o agenda no encontrados");
+                    throw new Exception("Usuario o usuario compartido no encontrado");
+                }
+
+                var contactBook = owner.MyContactBooks.FirstOrDefault(cb => cb.Id == contactBookId);
+
+                if (contactBook == null)
+                {
+                    throw new Exception("Agenda no encontrada");
+                }
+
+                // Asegurémonos de que no estemos compartiendo la misma agenda más de una vez
+                if (sharedUser.MySharedContactBooks.Any(sc => sc.ContactBookId == contactBookId))
+                {
+                    throw new Exception($"La agenda con ID {contactBookId} ya está compartida con el usuario con correo electrónico {sharedUserEmail}");
                 }
 
                 var sharedContactBook = new SharedContactBook
@@ -179,6 +190,7 @@ namespace Agenda_Back.Data.Repository.Implementation
                 throw;
             }
         }
+
     }
 }
 
