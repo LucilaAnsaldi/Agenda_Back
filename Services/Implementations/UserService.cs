@@ -138,7 +138,12 @@ namespace Agenda_Back.Services.Implementations
             {
                 var sharedContactBooks = await _userRepository.GetSharedContactBooksAsync(userId);
 
-                var contactBookDTOs = _mapper.Map<List<ContactBookDTO>>(sharedContactBooks);
+                var contactBookDTOs = sharedContactBooks.Select(cb =>
+                {
+                    var dto = _mapper.Map<ContactBookDTO>(cb);
+                    dto.OwnerUserName = cb.OwnerUser.Name;  // Asignar el nombre del propietario
+                    return dto;
+                }).ToList();
 
                 return contactBookDTOs;
             }
@@ -148,6 +153,7 @@ namespace Agenda_Back.Services.Implementations
                 throw;
             }
         }
+
 
         public async Task ShareContactBookAsync(int ownerId, string sharedUserEmail, int contactBookId)
         {

@@ -14,5 +14,7 @@ namespace Agenda_Back.Models.DTO
 
         public int OwnerUserId { get; set; }
 
+        public string OwnerUserName { get; set; }
+
     }
 }

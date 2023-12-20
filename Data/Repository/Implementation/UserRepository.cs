@@ -132,7 +132,8 @@ namespace Agenda_Back.Data.Repository.Implementation
                 var sharedContactBooks = await _context.SharedContactBooks
                     .Where(sc => sc.UserId == userId)
                     .Include(sc => sc.ContactBook)
-                    .Select(sc => sc.ContactBook)  // Seleccionar solo el/los ContactBook
+                        .ThenInclude(cb => cb.OwnerUser)  // Incluir la información del propietario
+                    .Select(sc => sc.ContactBook)
                     .ToListAsync();
 
                 return sharedContactBooks;
@@ -143,6 +144,7 @@ namespace Agenda_Back.Data.Repository.Implementation
                 throw;
             }
         }
+
 
         public async Task ShareContactBookAsync(int ownerId, string sharedUserEmail, int contactBookId)
         {
